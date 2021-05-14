@@ -1,3 +1,6 @@
+# Mac crud
+.DS_Store
+
 # Logs
 logs
 *.log
