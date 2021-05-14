@@ -11,24 +11,26 @@ The Scripter plug-in provides an interface between JavaScript code and the MIDI 
 
 * [Background](#background)
   * [Doc Status](#doc-status)
-* [Apple Documentation](#apple-documentation)
+  * [Apple's Scripter Documentation](#apples-scripter-documentation)
   * [Getting Started](#getting-started)
   * [Apple's Tutorial Scripts](#apples-tutorial-scripts)
 * [Files and Directories](#files-and-directories)
-* [Few Differences for Developers using Scripter](#few-differences-for-developers-using-scripter)
+* [Few Differences for JavaScript Developers using Scripter](#few-differences-for-javascript-developers-using-scripter)
   * [Fragility](#fragility)
   * [Not a Browser or Node.js](#not-a-browser-or-nodejs)
   * [Standard JavaScript Capabilities](#standard-javascript-capabilities)
-* [Logic's Global  Functions](#logics-global-functions)
+* [Global Functions](#global-functions)
   * [`HandleMIDI(event)`](#handlemidievent)
   * [`ProcessMIDI(event)`](#processmidievent)
   * [`Trace(obj)`](#traceobj)
     * [Trimming on Trace](#trimming-on-trace)
   * [`Idle()`](#idle)
-* [`Event` Object](#event-object)
-  * [Event Methods](#event-methods)
-  * [Event Properties](#event-properties)
-
+* [Scripter Objects](#scripter-objects)
+  * [`Event` Object](#event-object)
+    * [Event Methods](#event-methods)
+    * [Event Properties](#event-properties)
+    * [Event types](#event-types)
+    * [Creating an `Event`](#creating-an-event)
 
 
 ## Background
@@ -42,7 +44,7 @@ The scripts and tests were run on
 * MacOS Catalina 10.15.7
 * MacBook Pro (13-inch, 2020) with 2 GHz Quad-Core Intel Core i5 and 16GB memory
 
-## Apple Documentation
+### Apple's Scripter Documentation
 
 To get into the depth of Scripter, you should start with the [JavaScript objects overview](https://support.apple.com/en-au/guide/logicpro/lgcecc08451a/mac).
 
@@ -108,7 +110,7 @@ Logic Pro script directory contains the Factory Script plug-ins that you see in 
 
 
 
-## Few Differences for Developers using Scripter
+## Few Differences for JavaScript Developers using Scripter
 
 So you're already a decent JavaScript programmer. What's familiar or different about Scripter?
 
@@ -165,8 +167,9 @@ NOT supported:
 
 
 
-## Logic's Global  Functions
+## Global Functions
 
+The following are the Scripter functions that integrate into the Logic Pro MIDI environment.
 
 | Feature | Description |
 | --- | --- |
@@ -394,12 +397,13 @@ So Logic offers the `Idle()` function for housekeeping duties that might take a 
 Your `Idle()` function is called approximately every quarter second. (I measured it at 0.265sec on my MacBook Pro but have no idea if that will vary between Logic updates or across hardware).
 
 
+## Scripter Objects
 
-## `Event` Object
+### `Event` Object
 
 Read Apple's documentation on the [Event Object](https://support.apple.com/en-au/guide/logicpro/lgce0d0efc5a/10.6.2/mac/10.15.7)
 
-### Event Methods
+#### Event Methods
 
 - `Event.send()`: Send the event immediately.
 - `Event.sendAfterMilliseconds(delay-in-msec)`: Send the event after a specific delay (can be an integer or a floating point number).
@@ -408,13 +412,14 @@ Read Apple's documentation on the [Event Object](https://support.apple.com/en-au
 - `Event.trace()`: Print the event to the console using the `Trace()` object.
 - `Event.toString()`: Returns selected information about the event as a string.
 
-### Event Properties
+#### Event Properties
 
 - Event.toarticulationID(integer number): Sets the articulation ID from 0–254.
 - Event.channel(number): Set MIDI channel 1 to 16.
 - Event.beatPos: Retrieves the event’s exact beat position.
 
-Event types
+#### Event types
+
 The Event object is a prototype for the following event types. All event types inherit the methods and channel properties described above.  The event types and their properties are passed to HandleMIDI as follows:
 - NoteOn.pitch(integer number): Pitch from 1–127.
 - NoteOn.velocity(integer number): Velocity from 0–127. A velocity value of 0 is interpreted as a note off event, not a note on.
@@ -429,6 +434,8 @@ The Event object is a prototype for the following event types. All event types i
 - PitchBend.value(integer number): 14-bit pitch bend value from -8192–8191. A value of 0 is center.
 - TargetEvent.target(string): Create user definable MIDI CC messages or control plug-in parameters.
 - TargetEvent.value(float): Sets the target value.
+
+#### Creating an `Event`
 
 Events can be created:
 ```
