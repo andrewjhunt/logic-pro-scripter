@@ -13,8 +13,8 @@ The Scripter plug-in provides an interface between JavaScript code and the MIDI 
   * [Doc Status](#doc-status)
   * [Apple's Scripter Documentation](#apples-scripter-documentation)
   * [Getting Started](#getting-started)
-  * [Apple's Tutorial Scripts](#apples-tutorial-scripts)
-* [Files and Directories](#files-and-directories)
+  * [Apple's Tutorial  Scripts](#apples-tutorial--scripts)
+  * [Files and Directories](#files-and-directories)
 * [Few Differences for JavaScript Developers using Scripter](#few-differences-for-javascript-developers-using-scripter)
   * [Fragility](#fragility)
   * [Not a Browser or Node.js](#not-a-browser-or-nodejs)
@@ -31,7 +31,7 @@ The Scripter plug-in provides an interface between JavaScript code and the MIDI 
     * [Event Properties](#event-properties)
     * [Event types](#event-types)
     * [Creating an `Event`](#creating-an-event)
-
+    
 
 ## Background
 
@@ -90,13 +90,13 @@ The basic script development process is:
 2. Click the "Run Script" button at the top of Script Editor to activate your script (or get a bug report)
 3. Monitor the script in the console. Often you'll need to start playing your track for the most interesting stuff.
 
-### Apple's Tutorial Scripts
+### Apple's Tutorial  Scripts
 
 Scripter comes with a set of Tutorial Scripts that show the basic functions of Script in action. These are a good to get started.
 
 ![Tutorial Scripts](images/tutorial-scripts.png)
 
-## Files and Directories
+### Files and Directories
 
 Scripter plug-in files are stored as `.pst` files which are Apple Logic plugin settings files.  These files contain your scripts, settings and other info (I'm not sure what else Logic puts in these proprietary binary files).
 
