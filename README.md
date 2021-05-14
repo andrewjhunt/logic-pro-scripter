@@ -6,18 +6,21 @@ The Scripter plug-in provides an interface between JavaScript code and the MIDI 
 * Transform MIDI: transpose notes, modify timing and rhythm
 * Automation
 
+
 ## Contents
 
-* Status
-* Apple Documentation
-* Getting Started
-* Few Differences for Developers using Scripter
-* Logic's Global Functions
-* `Idle()`
-* `Event` Object
- * Event Methods
- * Event Properties
-
+* [Status](#status)
+* [Apple Documentation](#apple-documentation)
+* [Getting Started](#getting-started)
+* [Few Differences for Developers using Scripter](#few-differences-for-developers-using-scripter)
+ * [Fragility](#fragility)
+ * [Not a Browser or Node.js](#not-a-browser-or-nodejs)
+ * [Standard JavaScript Capabilities](#standard-javascript-capabilities)
+* [Logic's Global  Functions](#logics-global-functions)
+* [`Idle()`](#idle)
+* [`Event` Object](#event-object)
+ * [Event Methods](#event-methods)
+ * [Event Properties](#event-properties)
 
 ## Status
 
@@ -75,7 +78,7 @@ The basic script development process is:
 
 ## Few Differences for Developers using Scripter
 
-**Fragility**
+### Fragility
 
 My impression is that Apple has not "hardened" the Scripter environment. I find it crashes easily. That is, a rogue script will instantly crash the Logic Pro app (not just scripter).
 
@@ -87,13 +90,13 @@ Some easy ways to crash Logic with Scripter...
 
 The time limitations MAKE SENSE. Music is time-sensitive and delays of a few milliseconds can affect output quality. (Look below for the `Idle()` that helps with slower tasks.)
 
-**Not a Browser or Node.js**
+### Not a Browser or Node.js
 
 Each JavaScript runtime has a context. JS running in a browser has access to windows, DOM and other webby things plus many critical security constraints.  Node.js has access to parts of the operating system including the file system, ability to load packages plus a different set of critical security constraints.
 
 Scripter is a smaller environment than either the browser or node.js.
 
-**Standard JavaScript Capabilities**
+### Standard JavaScript Capabilities
 
 Script is ES6 (EcmaScript 6).
 
@@ -126,7 +129,7 @@ NOT supported:
 - alert
 - console  (use `Trace` instead)
 
-## Logic's Global Functions
+## Logic's Global  Functions
 
 | Feature | Description |
 | --- | --- |
