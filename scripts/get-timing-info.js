@@ -11,7 +11,6 @@ function ProcessMIDI() {
 
     //if the transport is running
     if (info.playing) {
-
         Trace(info.tempo); // print the tempo in the plugin console
     }
 }
