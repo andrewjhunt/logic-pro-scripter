@@ -46,7 +46,7 @@ function makeTOC(line) {
   // replace whitespace with hyphen
   id = id.replace(/\s+/g, '-');
 
-  const indent = ' '.repeat(header[0].length-2);
+  const indent = ' '.repeat(2 * (header[0].length-2));
 
   return `${indent}* [${text}](#${id})`;
 }
