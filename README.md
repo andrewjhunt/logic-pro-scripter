@@ -31,7 +31,7 @@ The Scripter plug-in provides an interface between JavaScript code and the MIDI 
     * [Event Properties](#event-properties)
     * [Event types](#event-types)
     * [Creating an `Event`](#creating-an-event)
-    
+
 
 ## Background
 
@@ -90,11 +90,20 @@ The basic script development process is:
 2. Click the "Run Script" button at the top of Script Editor to activate your script (or get a bug report)
 3. Monitor the script in the console. Often you'll need to start playing your track for the most interesting stuff.
 
-### Apple's Tutorial  Scripts
+### Apple's Tutorial Scripts
 
 Scripter comes with a set of Tutorial Scripts that show the basic functions of Script in action. These are a good to get started.
 
 ![Tutorial Scripts](images/tutorial-scripts.png)
+
+### Apple's Factory Scripts
+
+Logic Pro is bundled a set of Factory scripts that show the power of Scripter to do very useful MIDI treatment.
+
+These scripts are also very useful for understanding how to create your own scripts. To review the Scripter code, select them from the Scripter plug-in menu and click "Open Script in Editor".
+
+![Factory Scripts](images/factory-scripts.png)
+
 
 ### Files and Directories
 
@@ -126,7 +135,7 @@ Some easy ways to crash Logic with Scripter...
 
 The time limitations MAKE SENSE. Music is time-sensitive and delays of a few milliseconds can affect output quality. (Look below for the `Idle()` that helps with slower tasks.)
 
-### Not a Browser or Node.js
+### Unlike a Browser or Node.js
 
 Each JavaScript runtime has a context. JS running in a browser has access to windows, DOM and other webby things plus many critical security constraints.  Node.js has access to parts of the operating system including the file system, ability to load packages plus a different set of critical security constraints.
 
@@ -138,12 +147,12 @@ Script is ES6 (EcmaScript 6).
 
 The standard set of JavaScript features you know and love are available like...
 
-- Class
-- Date
-- JSON
-- Math
-- Number
-- RegExp
+- `Class`
+- `Date`
+- `JSON`
+- `Math`
+- `Number`
+- `RegExp`
 - plenty more
 
 ES6 gives us lots of nice features compared to older variants.
@@ -162,22 +171,31 @@ BUT... there are some things you might take for granted in a browser or node.js 
 NOT supported:
 - `require` or `import`
 - file reading or any OS access
-- alert
-- console  (use `Trace` instead)
+- `alert`
+- `console` - use `Trace` instead
 
 
+## Global Variables
+
+Name | Description
+--- | ---
+`NeedsTimingInfo` | TODO boolean
+??ResetParameterDefaults:boolean | TODO
 
 ## Global Functions
 
 The following are the Scripter functions that integrate into the Logic Pro MIDI environment.
 
-| Feature | Description |
-| --- | --- |
-| `HandleMIDI(event)` | Called with each MIDI event on the channel that is received by the plug-in. |
-| `ProcessMIDI(event)` | Called periodically for regular tasks like sequencing and tempo-based effects. |
-| `Trace(obj)` | Prints `obj` to the console. Only a single parameter is supported. |
-| `Reset()` | Called when (a) bypass the Scripter plug-in, or (b) transport is started. No parameters |
-| `Idle()` | Called during idle times when it won't get in the way of HandleMIDI() and ProcessMIDI(). Usually a few times per second. TODO - expand |
+Feature | Description
+--- | ---
+`HandleMIDI(event)` | Called with each MIDI event on the channel that is received by the plug-in
+`ProcessMIDI(event)` | Called periodically for regular tasks like sequencing and tempo-based effects
+`ParameterChanged(paramNum, value)`	| TODO
+`GetTimingInfo()` |	Retrieves a `TimingInfo` object, which contains timing information that describes the state of the host transport and the current musical tempo and meter
+`GetParameter(string)` | Returns a given parameter’s current value
+`Trace(obj)` | Prints `obj` to the console. Only a single parameter is supported
+`Reset()` | Called when (a) bypass the Scripter plug-in, or (b) transport is started. No parameters
+`Idle()` | Called during idle times when it won't get in the way of HandleMIDI() and ProcessMIDI(). Usually a few times per second. TODO - expand
 
 
 ### `HandleMIDI(event)`
@@ -258,7 +276,12 @@ Sample Rate | Buffer Size | Block size | Calculation | Block Freq
 
 `ProcessMIDI()` is often used in combination with the [`TimingInfo`](#timinginfo-object) object which provides timing information from Logic.
 
-This example allows you to confirm the interval between calls to `ProcessMIDI()`. See [`scripts/processmidi-timing.js`](scripts/processmidi-timing.js)
+Caution: if you print much information on each call to `ProcessMIDI()` it can cause [trimming](#trimming-on-trace) and you won't see all the messages.
+
+
+#### Find your block duration
+
+This example allows you to determine the interval between calls to `ProcessMIDI()`. See [`scripts/processmidi-timing.js`](scripts/processmidi-timing.js)
 
 ```
 /*
@@ -274,7 +297,8 @@ function ProcessMIDI() {
 }
 
 /*
- * Sample output
+ * Sample output with sample rate of 44.1kHz and buffer of 1024 samples
+
  23ms
  24ms
  23ms
@@ -403,24 +427,50 @@ Your `Idle()` function is called approximately every quarter second. (I measured
 
 Read Apple's documentation on the [Event Object](https://support.apple.com/en-au/guide/logicpro/lgce0d0efc5a/10.6.2/mac/10.15.7)
 
+#### Event Types
+
+`Note` TODO
+
+
 #### Event Methods
 
-- `Event.send()`: Send the event immediately.
-- `Event.sendAfterMilliseconds(delay-in-msec)`: Send the event after a specific delay (can be an integer or a floating point number).
-- `Event.sendAtBeat(beat)`: Send the event at a specific beat in the host timeline. The beat is a floating-point number.
-- `Event.sendAfterBeats(number beat)`: Send the event after a delay measure in beats.
-- `Event.trace()`: Print the event to the console using the `Trace()` object.
-- `Event.toString()`: Returns selected information about the event as a string.
+Generally, a MIDI plugin in Script will receive each MIDI event, treat it in some way, then "send" it onwards. Sending means passing on the MIDI event to the next step in the channel. That might be another MIDI FX plug-in or the Instrument.
 
-#### Event Properties
-
-- Event.toarticulationID(integer number): Sets the articulation ID from 0–254.
-- Event.channel(number): Set MIDI channel 1 to 16.
-- Event.beatPos: Retrieves the event’s exact beat position.
+Event Method | Description
+--- | ---
+`Event.send()` | Send the event immediately
+`Event.sendAfterMilliseconds(delay-in-msec)` | Send the event after a specific delay (can be an integer or a floating point number)
+`Event.sendAtBeat(beat)` | Send the event at a specific beat in the host timeline. The beat is a floating-point number.
+`Event.sendAfterBeats(number beat)` | Send the event after a delay measure in beats.
+`Event.trace()` | Print the event to the console using the `Trace()` object
+`Event.toString()` | Returns selected information about the event as a string.
+`Event.toarticulationID(integer number)` | Sets the articulation ID from 0–254
+`Event.channel(number)` | Set MIDI channel 1 to 16
+`Event.beatPos` | Retrieves the event’s exact beat position
 
 #### Event types
 
-The Event object is a prototype for the following event types. All event types inherit the methods and channel properties described above.  The event types and their properties are passed to HandleMIDI as follows:
+The Event object is a prototype for the various standard MIDI event types.
+
+Class | Description
+--- | ---
+`Note` | Parent class of `NoteOn` and `NoteOff`
+`NoteOn` | Represents a note on event
+`NoteOff` | Represents a note off event
+`PolyPressure` | A polyphonic aftertouch event
+`ControlChange` | A MIDI control change event
+`ProgramChange` | Represents a MIDI program change event
+`ChannelPressure` | Represents a MIDI channel pressure event
+`PitchBend` | Represents a MIDI pitch bend event
+`Fader` | Represents a Fader event
+
+
+
+All event types share methods and channel properties described above.
+
+
+
+
 - NoteOn.pitch(integer number): Pitch from 1–127.
 - NoteOn.velocity(integer number): Velocity from 0–127. A velocity value of 0 is interpreted as a note off event, not a note on.
 - NoteOff.pitch(integer number): Pitch from 1–127.
@@ -476,3 +526,49 @@ Here's a JSON dump of the object contents...
     "beatPos":0
 }
 ```
+
+### `TimingInfo` Object
+
+TimingInfo – Contains timing information that describes the state of the host transport and the current musical tempo and meter
+
+TimingInfo Property | Type | Description
+`playing` | boolean | Value is true when the host transport is running
+`blockStartBeat` | float | Indicates the beat position at the start of the process block
+`blockEndBeat` | float | Indicates the beat position at the end of the process block
+`blockLength` | float | Indicates the length of the process block in beats
+`tempo` | float | Indicates the host tempo.
+`meterNumerator` | integer | Indicates the host meter numerator. e.g. '3' in '3/4' time
+`meterDemoninator` | integer | Indicates the host meter denominator. e.g. '4' in '3/4' time
+`cycling` | boolean | Value is true when the host transport is cycling
+`leftCycleBeat` | float | Indicates the beat position at the start of the cycle range
+`rightCycleBeat` | float |	Indicates the beat position at the end of the cycle range
+
+### `MIDI` Object
+
+The `MIDI` object is a global provided by Scripter with utility functions for working with MIDI objects.
+
+In Logic Pro 10.15.X, the MIDI object is defined here...
+
+```
+/Applications/Logic Pro X.app/Contents/Frameworks/MADSP.framework/Versions/A/Resources/MIDIClass.js
+```
+
+`MIDI` Function | Description
+--- | ---
+`ccName(num)` | Convert a MIDI control channel number to it's name (string). e.g. `MIDI.ccName(2)` returns `"Breath"`
+`allNotesOff()` | What it says :-)
+`normalizeStatus(num)` | Ensures that a MIDI status is an integer in the "normal" range of 128 to 239 (inclusive). Default return is 128.  Example: `MIDI.normalizeStatus(213)` returns 213 but `MIDI.normalizeStatus(248)` returns 239. See the [Expanded MIDI 1.0 Messages List (Status Bytes)](https://www.midi.org/specifications-old/item/table-2-expanded-messages-list-status-bytes)
+`normalizeChannel(channel)` | Normalises the channel to be an integer from 1 to 16. Default is 1. e.g. `MIDI.normalizeChannel(3)` returns 3
+`normalizeData(num)` | Normalises the data value to be an integer from 0 to 127. Default is 1. e.g. `MIDI.normalizeData(48)` returns 48
+`noteNumber(str)` | Converts a note name string to the MIDI number. e.g. `MIDI.noteNumber("C#1")` returns 37. Returns null if the parameter is not a valid note number.
+`noteName(num)` | Converts a MIDI note number to the name (string). e.g. `MIDI.noteName(37)` returns `"C#1"`. Returns null if the parameter is not a valid note number
+
+The `MIDI` object also presents the following internal utilities. It's recommend that you use the corresponding public functions above.
+
+
+`MIDI` Property | Description
+--- | ---
+`_noteNames` | Use `noteName()`.  Array of 128 MIDI notes names. `[C-2,C#-2,D-2,...,F8,F#8,G8]` with `MIDI._noteNames[37] = "C#1"`
+`_makeNoteNames` | Utility that creates the `_noteNames` array
+`_ccNames` | Array of 128 MIDI Control Change names. `['Bank MSB', 'Modulation','Breath', ... 'Poly Mode On']`
+`_sendEventOnAllChannels` | Use the public functions
