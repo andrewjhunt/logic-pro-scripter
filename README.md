@@ -13,14 +13,15 @@ The Scripter plug-in provides an interface between JavaScript code and the MIDI 
 * [Apple Documentation](#apple-documentation)
 * [Getting Started](#getting-started)
 * [Few Differences for Developers using Scripter](#few-differences-for-developers-using-scripter)
- * [Fragility](#fragility)
- * [Not a Browser or Node.js](#not-a-browser-or-nodejs)
- * [Standard JavaScript Capabilities](#standard-javascript-capabilities)
+  * [Fragility](#fragility)
+  * [Not a Browser or Node.js](#not-a-browser-or-nodejs)
+  * [Standard JavaScript Capabilities](#standard-javascript-capabilities)
 * [Logic's Global  Functions](#logics-global-functions)
 * [`Idle()`](#idle)
 * [`Event` Object](#event-object)
- * [Event Methods](#event-methods)
- * [Event Properties](#event-properties)
+  * [Event Methods](#event-methods)
+  * [Event Properties](#event-properties)
+    * [Event Properties 2](#event-properties)
 
 ## Status
 
