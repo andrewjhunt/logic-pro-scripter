@@ -2,7 +2,7 @@ var PluginParameters =
 [
     // Text divider / header
     {
-        name:"------ Sample Console ------",
+        name:"------ Example Plugin Parameters ------",
 	      type:"text",
     },
     // Note Velocity: linear slider with a range of 1 to 127 in 126 steps. Default: 100
