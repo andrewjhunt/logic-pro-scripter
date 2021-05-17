@@ -49,7 +49,10 @@
         <div>
           xxx
           <pre>
-            {{ 10 }}
+            {{ JSON.stringify({a:10, b:true}, null, 4) }}
+          </pre>
+          <pre>
+            {{ JSON.stringify({a:100, b:true}, null, 4) }}
           </pre>
         </div>
         {{ content }}
