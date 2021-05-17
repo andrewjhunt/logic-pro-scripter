@@ -19,10 +19,12 @@ The Scripter plug-in provides an interface between JavaScript code and the MIDI 
   * [Apple's Tutorial Scripts](#apples-tutorial-scripts)
   * [Apple's Factory Scripts](#apples-factory-scripts)
   * [Files and Directories](#files-and-directories)
+* [Standard JavaScript Capabilities](#standard-javascript-capabilities)
 * [Few Differences for JavaScript Developers using Scripter](#few-differences-for-javascript-developers-using-scripter)
+  * [Limitations to JavaScript](#limitations-to-javascript)
+  * [Limited UI](#limited-ui)
   * [Fragility](#fragility)
   * [Unlike a Browser or Node.js](#unlike-a-browser-or-nodejs)
-  * [Standard JavaScript Capabilities](#standard-javascript-capabilities)
 * [Global Variables](#global-variables)
 * [Global Functions](#global-functions)
   * [`HandleMIDI(event)`](#handlemidievent)
@@ -40,8 +42,8 @@ The Scripter plug-in provides an interface between JavaScript code and the MIDI 
     * [Creating an `Event`](#creating-an-event)
     * [Clone an Event](#clone-an-event)
     * [Modifying an Event](#modifying-an-event)
-    * [`NoteOn`](#noteon)
-    * [`NoteOff` Events](#noteoff-events)
+    * [`NoteOn` Event](#noteon-event)
+    * [`NoteOff` Event](#noteoff-event)
     * [`PolyPressure` Event](#polypressure-event)
     * [`ControlChange` Event](#controlchange-event)
     * [`ProgramChange` Events](#programchange-events)
@@ -49,10 +51,19 @@ The Scripter plug-in provides an interface between JavaScript code and the MIDI 
     * [`PitchBend` Event](#pitchbend-event)
     * [`Fader` Events](#fader-events)
     * [`TargetEvent` Events](#targetevent-events)
+    * [`Event` - Under the Covers](#event--under-the-covers)
   * [`TimingInfo` Object](#timinginfo-object)
+    * [`TimingInfo` for tempo](#timinginfo-for-tempo)
+    * [`TimingInfo` and the Cycle](#timinginfo-and-the-cycle)
+    * [Project with changing time signatures](#project-with-changing-time-signatures)
+    * [`TimingInfo` for blocks](#timinginfo-for-blocks)
+  * [`PluginParameters` Object](#pluginparameters-object)
+    * [`PluginParameters` Functions](#pluginparameters-functions)
+    * [`PluginParameters` Example](#pluginparameters-example)
+    * [Unicode](#unicode)
   * [`MIDI` Object](#midi-object)
 * [Appendix 1 - Native Functions](#appendix-1--native-functions)
-
+* [Appendix 2 - Real Time??](#appendix-2--real-time)
 
 ## Background
 
@@ -161,7 +172,7 @@ ES6 gives us lots of nice features compared to older variants.
 * rest parameter (...) allows a function to treat an indefinite number of arguments as an array. `function sum(...args) { code }`
 * `for/of` loops: `for (variable of iterable) { ... }`
 * JavaScript Classes
-* JavaScript Promises (TODO - any use in Scripter for MIDI)
+* JavaScript Promises (I'm not sure this is any use in Scripter for MIDI because we can't call async functions but feel free to code creatively)
 * Array.find() and Array.findIndex()
 
 
@@ -211,8 +222,8 @@ Scripter is a smaller environment than either the browser or node.js.
 
 Name | Description
 --- | ---
-`NeedsTimingInfo` | TODO boolean
-??ResetParameterDefaults:boolean | TODO
+`NeedsTimingInfo` | Boolean. Set to `true` to enable the `GetTimingInfo()` function for access to current [`TimingInfo`](#timinginfo-object) properties
+`ResetParameterDefaults` | Boolean. Sets UI controls to default values. NOTE: documentation on this is limited and I can't figure out how to use it.
 
 ## Global Functions
 
