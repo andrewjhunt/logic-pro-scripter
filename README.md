@@ -1,5 +1,7 @@
 # Logic Pro Scripter Guide
 
+View the latest [Logic Pro Scripter Guide](https://andrewjhunt.github.io/logic-pro-scripter/)
+
 This guide is intended for developers who want to use their dev knowledge to do good stuff with Scripter for MIDI in Logic Pro. It assumes some knowledge of both Logic Pro and JavaScript. I maintain it because I found [Apple's Scripter documentation](https://support.apple.com/en-au/guide/logicpro/lgce728c68f6/mac) both incomplete and somewhat difficult to use.
 
 ## Contents
