@@ -48,8 +48,18 @@
       <section>
         <div>
           <pre>
-            {{ site | jsonify }}
+            site.static_files
+            {{ site.static_files | jsonify }}
           </pre>
+          <pre>
+            site.html_pages
+            {{ site.html_pages | jsonify }}
+          </pre>
+          <pre>
+            site.collections
+            {{ site.collections | jsonify }}
+          </pre>
+
         </div>
         {{ content }}
       </section>
