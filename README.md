@@ -1,6 +1,6 @@
 # Logic Pro Scripter Guide
 
-This guide is intended for developers who want to use their dev knowledge to do good stuff with Scripter for MIDI in Logic Pro. It assumes some knowledge of both Logic Pro and JavaScript. I maintain it because I found the Apple doc both incomplete and difficult to use.
+This guide is intended for developers who want to use their dev knowledge to do good stuff with Scripter for MIDI in Logic Pro. It assumes some knowledge of both Logic Pro and JavaScript. I maintain it because I found [Apple's Scripter documentation](https://support.apple.com/en-au/guide/logicpro/lgce728c68f6/mac) both incomplete and somewhat difficult to use.
 
 ## Contents
 
@@ -14,7 +14,24 @@ The Scripter plug-in provides an interface between JavaScript code and the MIDI 
 * Generate MIDI: like notes for chords, arpeggios. Or controls for modulation and effects.
 * Transform MIDI: transpose notes, modify timing and rhythm
 * Inject automation
-* Control anything that MIDI can do
+* Control anything that MIDI can
+
+Combining multiple MIDI FX plugins can be particularly powerful:
+
+* Scripter can be chained with other MIDI FX plugins
+* Multiple Scripters can be chained in together
+
+For example, this chain combines 5 MIDI FX That
+
+1. Convert single notes to Chords with the Chord Trigger plugin
+2. Use the MIDI Arpeggiator to play those chords as argeggios
+3. Use Transposer to change pitch
+4. Use a custom Scripter to play delayed echo notes
+5. Use a custom Scripter to duplicate quieter notes up an octave
+
+Even more power can be achieved by managing MIDI flows with the MIDI Environment.
+
+![Chain MIDI FX](images/chain-fx.png)
 
 ### Doc Status
 
@@ -27,15 +44,7 @@ The scripts and tests were run on
 
 ### Apple's Scripter Documentation
 
-To get into the depth of Scripter, you should start with the [JavaScript objects overview](https://support.apple.com/en-au/guide/logicpro/lgcecc08451a/mac).
-
-* Event object for MIDI events like notes and control change
-* TimingInfo object: just as it says, it is timing information that you can get on a heartbeat
-* Trace: utility to print to the Scripter console. Kind of a simplified `console.log()`
-* MIDI object: utility to handle notes and control values
-
-But then examples bundled with Logic Pro X reveal a lot more about what you can do. Plus they use a number of undocumented features.
-
+Can you start with Apple's doc for the [Logic Pro Scripter MIDI plug-in](https://support.apple.com/en-au/guide/logicpro/lgce728c68f6/mac) covering all the core topics you'll need. Integrated into that documentation is a set of scripts that you'll find packaged with Logic Pro Scripter under it's Factory / Tutorial Scripts.  The Factory scripts also reveal a lot about Scripter that's not written in the documentation.
 
 ### Getting Started
 
@@ -53,25 +62,23 @@ Script is a MIDI plug-in. Here's the quick steps to get scripter going (but ther
 
 ![MIDI FX Options](images/midifx-options.png)
 
-[5] Two Scripter windows will open. First is the plug-in control panel which is much like any plug-in window -- except that you are able to program it. The second is the Script Editor which is the playspace for developers.
+[5] Scripter presents as a standard Logic plug-in with a control panel.
+
+1. Menu items described below
+2. Panel for "Global Parmaeters" which are populated from the [`PluginParameters` object](#pluginparameters-object)
+3. "Open Script in Editor" button to open the [Script Editor window](#script-editor-window)
 
 ![Scripter Plugin Window](images/scripter-plugin-window.png)
 
-![Script Editor](images/scripter-dev-window.png)
+The Scripter menu (shown above as "Factory Default") provides
 
-#### Script Editor Panels
+1. Standard plug-in options like Undo, Redo and Next/Previous plugin
+2. A set of file comments for loading, savings and other management of your Scripts
+3. A list of the existing saved user scripts (see [Files and Directories](#files-and-directories))
+4. Factory menu for Apple's standard scripts and Tutorial scripts
 
-The Script Editor has two panels:
+![Scripter Menu](images/scripter-menu.png)
 
-1. Top panel contains JavaScript with useful capabilities like syntax highlighting.
-2. The lower panel is the Console which shows the output of the script. It's much like the console in any web browser.
-
-A new Scripter will contain a basic script that (a) prints each MIDI event to the console with `event.trace()` (which prints a summary of the event using `Trace()`), and (b) passes through the event with `event.send()`.
-
-The basic script development process is:
-1. Load and/or Edit a script
-2. Click the "Run Script" button at the top of Script Editor to activate your script (or get a bug report)
-3. Monitor the script in the console. Often you'll need to start playing your track for the most interesting stuff.
 
 ### Apple's Tutorial Scripts
 
@@ -88,13 +95,32 @@ These scripts are also very useful for understanding how to create your own scri
 ![Factory Scripts](images/factory-scripts.png)
 
 
+#### Script Editor Window
+
+The Script Editor window is opened by click "Open Script in Editor" on the main plugin window.
+
+The Script Editor has two panels:
+
+1. Top panel contains JavaScript with useful capabilities like syntax highlighting.
+2. The lower panel is the Console which shows the output of the script. It's much like the console in any web browser.
+
+A new Scripter will contain a basic script that (a) prints each MIDI event to the console with `event.trace()` (which prints a summary of the event using `Trace()`), and (b) passes through the event with `event.send()`.
+
+The basic script development process is:
+1. Load and/or Edit a script
+2. Click the "Run Script" button at the top of Script Editor to activate your script (or get a bug report)
+3. Monitor the script in the console. Often you'll need to start playing your track for the most interesting stuff.
+
+![Script Editor](images/scripter-dev-window.png)
+
+
 ### Files and Directories
 
 Scripter plug-in files are stored as `.pst` files which are Apple Logic plugin settings files.  These files contain your scripts, settings and other info (I'm not sure what else Logic puts in these proprietary binary files).
 
 User script directory.  This is the default directory when you Load and Save scripts from the plug-in window.
 
-> `~/Music/Audio Music Apps/Plug-In Setttings/Scripter`
+> `~/Music/Audio Music Apps/Plug-In Settings/Scripter`
 
 Logic Pro script directory contains the Factory Script plug-ins that you see in the Scripter menu. Under this directory is the `Tutorial Scripts` directory.
 
@@ -184,7 +210,7 @@ The following are the Scripter functions that integrate into the Logic Pro MIDI 
 
 Feature | Description
 --- | ---
-`HandleMIDI(event)` | Called with each MIDI event on the channel that is received by the plug-in
+[`HandleMIDI(event)`](#handlemidievent) | Called with each MIDI event on the channel that is received by the plug-in
 `ProcessMIDI(event)` | Called periodically for regular tasks like sequencing and tempo-based effects
 `ParameterChanged(paramNum, value)`	| Called after any parameter change by the user
 `UpdatePluginParameters()` | dynamically updates the user interface
