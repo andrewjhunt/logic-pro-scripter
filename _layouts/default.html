@@ -47,15 +47,8 @@
 
       <section>
         <div>
-          xxx
           <pre>
-            {{ 10 }}
-          </pre>
-          <pre>
-            {{ {a:10, b:true} }}
-          </pre>
-          <pre>
-            {{ JSON.stringify({a:100, b:true}, null, 4) }}
+            {{ site | jsonify }}
           </pre>
         </div>
         {{ content }}
