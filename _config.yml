@@ -1,5 +1,7 @@
 # theme: jekyll-theme-architect
 theme: jekyll-theme-dinky
 
-title: The title of your site
-description: A short description of your site's purpose
+markdown: kramdown
+
+title: Logic Pro Scripter Guide
+description: Andrew Hunt
