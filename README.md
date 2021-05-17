@@ -365,6 +365,8 @@ Some things to note:
 
 The maximum string length appears to 1020 characters (as of Logic Pro 10.15.2).  Longer strings generate an error but processing continues: `Error: Trace() failed.  Try a shorter string.`
 
+Sometimes it appears that to much `Trace()` can cause Logic Pro to crash.
+
 #### `Trace()` for Javascript types
 
 All the standard JS types can be passed to `Trace()`. See [`scripts/trace.js`](scripts/trace.js)

@@ -32,9 +32,6 @@
           <a href='#markdown-toc'>Contents</a>
         </div>
 
-        <div>
-          {{ site.time }}
-        </div>
 
 
         {% if site.github.is_project_page %}
@@ -53,6 +50,10 @@
       <section>
         {{ content }}
       </section>
+
+      <footer>
+        Update: {{ site.time }}
+      </footer>
 
       <!--
       <footer>
