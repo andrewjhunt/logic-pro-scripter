@@ -45,11 +45,14 @@
         {% endif %}
       </header>
 
-      <section style='border: solid 1px yellow'>
+      <section>
         <div>
           xxx
           <pre>
-            {{ JSON.stringify({a:10, b:true}, null, 4) }}
+            {{ 10 }}
+          </pre>
+          <pre>
+            {{ {a:10, b:true} }}
           </pre>
           <pre>
             {{ JSON.stringify({a:100, b:true}, null, 4) }}
