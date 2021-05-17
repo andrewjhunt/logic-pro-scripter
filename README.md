@@ -203,6 +203,8 @@ Name | Description
 --- | ---
 `NeedsTimingInfo` | Boolean. Set to `true` to enable the `GetTimingInfo()` function for access to current [`TimingInfo`](#timinginfo-object) properties
 `ResetParameterDefaults` | Boolean. Sets UI controls to default values. NOTE: documentation on this is limited and I can't figure out how to use it.
+[`MIDI`](#midi-object) | Object. Provides a set of utility functions for working with MIDI objects.
+
 
 ## Global Functions
 
@@ -211,16 +213,16 @@ The following are the Scripter functions that integrate into the Logic Pro MIDI 
 Feature | Description
 --- | ---
 [`HandleMIDI(event)`](#handlemidievent) | Called with each MIDI event on the channel that is received by the plug-in
-`ProcessMIDI(event)` | Called periodically for regular tasks like sequencing and tempo-based effects
-`ParameterChanged(paramNum, value)`	| Called after any parameter change by the user
-`UpdatePluginParameters()` | dynamically updates the user interface
-`GetParameter(param-name)` | retrieves the current console value of a parameter
-`SetParameter(param-name, value)` | sets the console value of a parameter
-`GetTimingInfo()` |	Retrieves a `TimingInfo` object, which contains timing information that describes the state of the host transport and the current musical tempo and meter
-`GetParameter(string)` | Returns a given parameter’s current value
-`Trace(obj)` | Prints `obj` to the console. Only a single parameter is supported
-`Reset()` | Called when (a) bypass the Scripter plug-in, or (b) transport is started. No parameters
-`Idle()` | Called during idle times when it won't get in the way of HandleMIDI() and ProcessMIDI(). Usually a few times per second. TODO - expand
+[`ProcessMIDI(event)`](#processmidievent) | Called periodically for regular tasks like sequencing and tempo-based effects
+[`ParameterChanged(paramNum, value)`](#pluginparameters-object)	| Called after any parameter change by the user
+[`GetParameter(string)`](#xx) | Returns a given parameter’s current value
+[`UpdatePluginParameters()`](#xx) | dynamically updates the user interface
+[`GetParameter(param-name)`](#xx) | retrieves the current console value of a parameter
+[`SetParameter(param-name, value)`](#xx) | sets the console value of a parameter
+[`GetTimingInfo()`](#xx) |	Retrieves a `TimingInfo` object, which contains timing information that describes the state of the host transport and the current musical tempo and meter
+[`Trace(obj)`](#xx) | Prints `obj` to the console. Only a single parameter is supported
+[`Reset()`](#xx) | Called when (a) bypass the Scripter plug-in, or (b) transport is started. No parameters
+[`Idle()`](#xx) | Called during idle times when it won't get in the way of HandleMIDI() and ProcessMIDI(). Usually a few times per second. TODO - expand
 
 
 ### `HandleMIDI(event)`
@@ -1034,6 +1036,26 @@ I had more luck with [Emojis](https://unicode-table.com/en/sets/top-emoji/) to s
   }
 ```
 
+
+#### `GetParameter()` Function
+
+TODO - expand and add example
+Returns a given parameter’s current value
+
+#### `UpdatePluginParameters()` Function
+
+TODO - expand and add example
+dynamically updates the user interface
+
+#### `GetParameter()` Function
+
+TODO - expand and add example
+retrieves the current console value of a parameter
+
+#### `SetParameter()` Function
+
+TODO - expand and add example
+sets the console value of a parameter
 
 
 ### `MIDI` Object
