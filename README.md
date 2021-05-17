@@ -6,6 +6,11 @@ The Scripter plug-in provides an interface between JavaScript code and the MIDI 
 * Transform MIDI: transpose notes, modify timing and rhythm
 * Automation
 
+TODO list
+- Verify https://culturedear.wordpress.com/tag/logic-pro-scripter/
+- Source EventTypes.js https://gist.github.com/djtech42/94e3b0980c684680ac79
+- what is "isRealTime" in Events?
+
 
 ## Contents
 
@@ -13,24 +18,42 @@ The Scripter plug-in provides an interface between JavaScript code and the MIDI 
   * [Doc Status](#doc-status)
   * [Apple's Scripter Documentation](#apples-scripter-documentation)
   * [Getting Started](#getting-started)
-  * [Apple's Tutorial  Scripts](#apples-tutorial--scripts)
+  * [Apple's Tutorial Scripts](#apples-tutorial-scripts)
+  * [Apple's Factory Scripts](#apples-factory-scripts)
   * [Files and Directories](#files-and-directories)
 * [Few Differences for JavaScript Developers using Scripter](#few-differences-for-javascript-developers-using-scripter)
   * [Fragility](#fragility)
-  * [Not a Browser or Node.js](#not-a-browser-or-nodejs)
+  * [Unlike a Browser or Node.js](#unlike-a-browser-or-nodejs)
   * [Standard JavaScript Capabilities](#standard-javascript-capabilities)
+* [Global Variables](#global-variables)
 * [Global Functions](#global-functions)
   * [`HandleMIDI(event)`](#handlemidievent)
   * [`ProcessMIDI(event)`](#processmidievent)
+    * [Find your block duration](#find-your-block-duration)
   * [`Trace(obj)`](#traceobj)
+    * [Limitations of `Trace()`](#limitations-of-trace)
+    * [`Trace()` for Javascript types](#trace-for-javascript-types)
     * [Trimming on Trace](#trimming-on-trace)
   * [`Idle()`](#idle)
 * [Scripter Objects](#scripter-objects)
   * [`Event` Object](#event-object)
+    * [Event Types](#event-types)
     * [Event Methods](#event-methods)
-    * [Event Properties](#event-properties)
-    * [Event types](#event-types)
     * [Creating an `Event`](#creating-an-event)
+    * [Clone an Event](#clone-an-event)
+    * [Modifying an Event](#modifying-an-event)
+    * [`NoteOn`](#noteon)
+    * [`NoteOff` Events](#noteoff-events)
+    * [`PolyPressure` Event](#polypressure-event)
+    * [`ControlChange` Event](#controlchange-event)
+    * [`ProgramChange` Events](#programchange-events)
+    * [`ChannelPressure` Event](#channelpressure-event)
+    * [`PitchBend` Event](#pitchbend-event)
+    * [`Fader` Events](#fader-events)
+    * [`TargetEvent` Events](#targetevent-events)
+  * [`TimingInfo` Object](#timinginfo-object)
+  * [`MIDI` Object](#midi-object)
+* [Appendix 1 - Native Functions](#appendix-1--native-functions)
 
 
 ## Background
@@ -118,34 +141,11 @@ Logic Pro script directory contains the Factory Script plug-ins that you see in 
 > `/Applications/Logic Pro X.app/Contents/Resources/Plug-In Settings/Scripter`
 
 
-
-## Few Differences for JavaScript Developers using Scripter
-
-So you're already a decent JavaScript programmer. What's familiar or different about Scripter?
-
-### Fragility
-
-My impression is that Apple has not "hardened" the Scripter environment. I find it crashes easily. That is, a rogue script will instantly crash the Logic Pro app (not just scripter).
-
-Some easy ways to crash Logic with Scripter...
-
-* Exceed tight memory limitations
-* Exceed tight time limitations
-* Other crashes that I can't diagnose
-
-The time limitations MAKE SENSE. Music is time-sensitive and delays of a few milliseconds can affect output quality. (Look below for the `Idle()` that helps with slower tasks.)
-
-### Unlike a Browser or Node.js
-
-Each JavaScript runtime has a context. JS running in a browser has access to windows, DOM and other webby things plus many critical security constraints.  Node.js has access to parts of the operating system including the file system, ability to load packages plus a different set of critical security constraints.
-
-Scripter is a smaller environment than either the browser or node.js.
-
-### Standard JavaScript Capabilities
+## Standard JavaScript Capabilities
 
 Script is ES6 (EcmaScript 6).
 
-The standard set of JavaScript features you know and love are available like...
+Most of the standard set of JavaScript features you know and love are available like...
 
 - `Class`
 - `Date`
@@ -166,13 +166,47 @@ ES6 gives us lots of nice features compared to older variants.
 * JavaScript Promises (TODO - could these be useful in Scripter?)
 * Array.find() and Array.findIndex()
 
-BUT... there are some things you might take for granted in a browser or node.js that are not available because this is Logic.
 
-NOT supported:
-- `require` or `import`
+## Few Differences for JavaScript Developers using Scripter
+
+So you're already a decent JavaScript programmer. What's familiar or different about Scripter?
+
+
+### Limitations to JavaScript
+
+There are some features that JS developers take for granted in a browser or node.js that are not available in Logic's Script.
+
 - file reading or any OS access
+- `require` or `import`
+- `setTimeout`
 - `alert`
 - `console` - use `Trace` instead
+
+### Limited UI
+
+You can implementation a range of useful input controls with the [`PluginParameters`](#pluginparameters-object).
+
+Unfortunately, there is no way to get text input from a user unless your user is prepared to edit a script.
+
+
+### Fragility
+
+My impression is that Apple has not "hardened" the Scripter environment. I find it crashes easily. That is, a rogue script will instantly crash the Logic Pro app (not just scripter).
+
+Some easy ways to crash Logic with Scripter...
+
+* Exceed tight memory limitations
+* Exceed tight time limitations
+* Other crashes that I can't diagnose
+
+The time limitations MAKE SENSE. Music is time-sensitive and delays of a few milliseconds can affect output quality. (Look below for the `Idle()` that helps with slower tasks.)
+
+### Unlike a Browser or Node.js
+
+Each JavaScript runtime has a context. JS running in a browser has access to windows, DOM and other webby things plus many critical security constraints.  Node.js has access to parts of the operating system including the file system, ability to load packages plus a different set of critical security constraints.
+
+Scripter is a smaller environment than either the browser or node.js.
+
 
 
 ## Global Variables
@@ -190,12 +224,17 @@ Feature | Description
 --- | ---
 `HandleMIDI(event)` | Called with each MIDI event on the channel that is received by the plug-in
 `ProcessMIDI(event)` | Called periodically for regular tasks like sequencing and tempo-based effects
-`ParameterChanged(paramNum, value)`	| TODO
+`ParameterChanged(paramNum, value)`	| Called after any parameter change by the user
+`UpdatePluginParameters()` | dynamically updates the user interface
+`GetParameter(param-name)` | retrieves the current console value of a parameter
+`SetParameter(param-name, value)` | sets the console value of a parameter
 `GetTimingInfo()` |	Retrieves a `TimingInfo` object, which contains timing information that describes the state of the host transport and the current musical tempo and meter
 `GetParameter(string)` | Returns a given parameter’s current value
 `Trace(obj)` | Prints `obj` to the console. Only a single parameter is supported
 `Reset()` | Called when (a) bypass the Scripter plug-in, or (b) transport is started. No parameters
 `Idle()` | Called during idle times when it won't get in the way of HandleMIDI() and ProcessMIDI(). Usually a few times per second. TODO - expand
+
+
 
 
 ### `HandleMIDI(event)`
@@ -316,13 +355,20 @@ This is useful for status and debug. Most Logic users of your plugin won't ever 
 
 Some things to note:
 
-1. [Trimming](#trimming) may prevent display of some of your messages. More detail [below](#trimming).
 1. Only a single parameter is accepted
 2. Create your own string if you want to write multiple parameters
 3. `JSON.stringify()` is available and useful
 4. `Trace()` without a parameter does nothing. Use `Trace("\n")` for a blank line.
 
-Here's a few useful ways to invoke `Trace()`. See [`scripts/trace.js`](scripts/trace.js)
+#### Limitations of `Trace()`
+
+[Trimming](#trimming) may prevent display of some of your messages. More detail [below](#trimming).
+
+The maximum string length appears to 1020 characters (as of Logic Pro 10.15.2).  Longer strings generate an error but processing continues: `Error: Trace() failed.  Try a shorter string.`
+
+#### `Trace()` for Javascript types
+
+All the standard JS types can be passed to `Trace()`. See [`scripts/trace.js`](scripts/trace.js)
 
 ```
 /* Trace() examples */
@@ -429,7 +475,19 @@ Read Apple's documentation on the [Event Object](https://support.apple.com/en-au
 
 #### Event Types
 
-`Note` TODO
+The `Event` object is a prototype for the various standard MIDI event types. All the following sub-classes share common properties and [Event Methods](#event-methods). However, each `Event` type has properties that are specific to it's MIDI definition.
+
+Class | Description
+--- | ---
+`Note` | Parent class of `NoteOn` and `NoteOff`
+`NoteOn` | Represents a note on event
+`NoteOff` | Represents a note off event
+`PolyPressure` | A polyphonic aftertouch event
+`ControlChange` | A MIDI control change event
+`ProgramChange` | Represents a MIDI program change event
+`ChannelPressure` | Represents a MIDI channel pressure event
+`PitchBend` | Represents a MIDI pitch bend event
+`Fader` | Represents a Fader event
 
 
 #### Event Methods
@@ -448,66 +506,86 @@ Event Method | Description
 `Event.channel(number)` | Set MIDI channel 1 to 16
 `Event.beatPos` | Retrieves the event’s exact beat position
 
-#### Event types
-
-The Event object is a prototype for the various standard MIDI event types.
-
-Class | Description
---- | ---
-`Note` | Parent class of `NoteOn` and `NoteOff`
-`NoteOn` | Represents a note on event
-`NoteOff` | Represents a note off event
-`PolyPressure` | A polyphonic aftertouch event
-`ControlChange` | A MIDI control change event
-`ProgramChange` | Represents a MIDI program change event
-`ChannelPressure` | Represents a MIDI channel pressure event
-`PitchBend` | Represents a MIDI pitch bend event
-`Fader` | Represents a Fader event
-
-
-
-All event types share methods and channel properties described above.
-
-
-
-
-- NoteOn.pitch(integer number): Pitch from 1–127.
-- NoteOn.velocity(integer number): Velocity from 0–127. A velocity value of 0 is interpreted as a note off event, not a note on.
-- NoteOff.pitch(integer number): Pitch from 1–127.
-- NoteOff.velocity(integer number): Velocity from 0–127.
-- PolyPressure.pitch(integer number): Pitch from 1–127.
-- PolyPressure.value(integer number): Define a pressure value from 0–127.
-- ControlChange.number(integer number): Controller number from 0–127.
-- ControlChange.value(integer number): Controller value from 0–127.
-- ProgramChange.number(integer number): Program change number from 0–127.
-- ChannelPressure.value(integer number): Aftertouch value from 0–127.
-- PitchBend.value(integer number): 14-bit pitch bend value from -8192–8191. A value of 0 is center.
-- TargetEvent.target(string): Create user definable MIDI CC messages or control plug-in parameters.
-- TargetEvent.value(float): Sets the target value.
 
 #### Creating an `Event`
 
-Events can be created:
+Each type of `Event` has a constructor. Currently, Scripter does not accept parameters on the constructor. So the pattern is to create a default event then set all required properties.
+
+This example creates then sends `ControlChange` event.
+
 ```
 {
-  var cc = new ControlChange;  /* make a new control change message */
-  cc.number = 1;   /* set it to controller 1 (modulation) */
-  cc.value = 100;   /* set the value */
-  cc.send();    /* send the event */
-  cc.trace();    /* print the event to the console */
+  var cc = new ControlChange;
+
+  // set controller numer 1 = modulation
+  cc.number = 1;
+  // set the ControlChange value
+  cc.value = 42;
+
+  // Send it!
+  cc.send();
+
+  // Print it to the console
+  cc.trace();
+}
+
+/*
+ * Expected output...
+
+ [ControlChange channel:1 number:1 [Modulation] value:42]
+ */
+
+```
+
+#### Clone an Event
+
+Clone an existing event by passing that event as the constructor parameter.
+
+```
+  const newNoteOn = new NoteOn(existingNoteOn);
+```
+
+The cloned `Event` can then be modified.
+
+```
+{
+  const cc1 = new ControlChange;
+  cc1.number = 1;
+  cc1.value = 42;
+
+  const cc2 = new ControlChange(cc1);
+  cc2.value++;
+
+  cc1.trace();
+  cc2.trace();
+}
+
+/*
+ * Expected output
+
+  [ControlChange channel:1 number:1 [Modulation] value:42]
+  [ControlChange channel:1 number:1 [Modulation] value:43]
+ */
+```
+
+#### Modifying an Event
+
+The properties of any event can be modified before the `send()`.
+
+This example transposes the pitch of every `Note` event (`NoteOn` and `NoteOff`) and passes through any other events without modification.
+
+```
+function HandleMIDI(event) {
+  if (event instanceof Note) {
+      event.pitch += 12;
+      event.send();
+  } else {
+    event.send();    
+  }
 }
 ```
 
-Events can be modified and re-used:
-```
-function HandleMIDI() {
-  var on = new NoteOn;   /* make a new note on */
-  on.pitch = 60;   /* set its pitch to C3 */
-  on.send();    /* send the note */
-  var off = new NoteOff(on);  /* make a note off using the note on to initialize its pitch value (to C3) */
- off.sendAfterBeats(1);  /* send a note off one beat later */
-}
-```
+TODO...
 
 Here's a JSON dump of the object contents...
 ```
@@ -527,6 +605,147 @@ Here's a JSON dump of the object contents...
 }
 ```
 
+#### `NoteOn`
+
+Has all the default [`Event` methods](#event-methods) plus the following properties:
+
+Property | Description
+--- | ---
+channel | [MIDI](#midi-object) value from 1 to 16
+pitch | [MIDI](#midi-object) value from 0 to 127
+velocity | [MIDI](#midi-object) value from 0 to 127.  A velocity value of 0 is interpreted as a note off event, not a note on.
+articulationID | ??
+inStartFrame | ??
+isRealtime | ??
+
+#### `NoteOff` Events
+
+Has all the default [`Event` methods](#event-methods) plus the following properties:
+
+Property | Description
+--- | ---
+channel | [MIDI](#midi-object) value from 1 to 16
+pitch | [MIDI](#midi-object) value from 0 to 127
+velocity | [MIDI](#midi-object) value from 0 to 127
+articulationID | ??
+inStartFrame | ??
+isRealtime | ??
+
+
+#### `PolyPressure` Event
+
+A polyphonic aftertouch event. It has all the default [`Event` methods](#event-methods) plus the following properties:
+
+Property | Description
+--- | ---
+channel | [MIDI](#midi-object) value from 1 to 16
+pitch | [MIDI](#midi-object) value from 0 to 127
+value | [MIDI](#midi-object) value from 0 to 127 providing the pressure level
+inStartFrame | ??
+isRealtime | ??
+
+
+#### `ControlChange` Event
+
+A MIDI control change event. It has all the default [`Event` methods](#event-methods) plus the following properties:
+
+Property | Description
+--- | ---
+channel | [MIDI](#midi-object) value from 1 to 16
+number | [MIDI](#midi-object) Controller value from 0 to 127. TODO
+value | [MIDI](#midi-object) Controller value from 0 to 127. TODO
+inStartFrame | ??
+isRealtime | ??
+
+
+#### `ProgramChange` Events
+
+Represents a MIDI program change event. It has all the default [`Event` methods](#event-methods) plus the following properties:
+
+Property | Description
+--- | ---
+channel | [MIDI](#midi-object) value from 1 to 16
+number | [MIDI](#midi-object) Program change number from 0 to 127.
+inStartFrame | ??
+isRealtime | ??
+
+
+#### `ChannelPressure` Event
+
+Represents a MIDI channel pressure event for after-touch. It has all the default [`Event` methods](#event-methods) plus the following properties:
+
+Property | Description
+--- | ---
+channel | [MIDI](#midi-object) value from 1 to 16
+value | [MIDI](#midi-object) channel pressure value from 0 to 127.
+inStartFrame | ??
+isRealtime | ??
+
+
+#### `PitchBend` Event
+
+Represents a MIDI pitch bend event with a 14-bit integer value in the range -8192 to +8191. 0 is the center value. It has all the default [`Event` methods](#event-methods) plus the following properties:
+
+Property | Description
+--- | ---
+channel | [MIDI](#midi-object) value from 1 to 16
+value | [MIDI](#midi-object) channel pressure value from -8192 to 8191
+inStartFrame | ??
+isRealtime | ??
+
+#### `Fader` Events
+
+Represents a Fader event. It has all the default [`Event` methods](#event-methods) plus the following properties:
+
+Property | Description
+--- | ---
+channel | [MIDI](#midi-object) value from 1 to 16
+?? number | [MIDI](#midi-object) fader number from 0 to 127
+value | [MIDI](#midi-object) fader value from 0 to 127
+inStartFrame | ??
+isRealtime | ??
+
+
+#### `TargetEvent` Events
+
+TODO
+
+- TargetEvent.target(string): Create user definable MIDI CC messages or control plug-in parameters.
+- TargetEvent.value(float): Sets the target value.
+
+#### `Event` - Under the Covers
+
+There is more information available about events than is presented via the documented Scripter API.  Use this script to display all properties of an event generated by Logic Pro.
+
+```
+function HandleMIDI(event) {
+  event.send();
+
+	event.trace();
+	Trace(JSON.stringify(event, null, 4))
+}
+```
+
+The JSON version shows additional properties that could be interpreted and manipulated.
+
+```
+[NoteOn channel:1 pitch:44 [G#1] velocity:91]
+{
+    "detune": 0,
+    "pitch": 44,
+    "velocity": 91,
+    "status": 144,
+    "isRealtime": false,
+    "data1": 44,
+    "data3": 0,
+    "data2": 91,
+    "channel": 1,
+    "port": 1,
+    "articulationID": 0,
+    "beatPos": 0
+}
+```
+
 ### `TimingInfo` Object
 
 TimingInfo – Contains timing information that describes the state of the host transport and the current musical tempo and meter
@@ -542,6 +761,130 @@ TimingInfo Property | Type | Description
 `cycling` | boolean | Value is true when the host transport is cycling
 `leftCycleBeat` | float | Indicates the beat position at the start of the cycle range
 `rightCycleBeat` | float |	Indicates the beat position at the end of the cycle range
+
+### `PluginParameters` Object
+
+`PluginParameters` is used to define the graphical interface for your plug-in.  The script sets the value to array of objects that define each parameter to display to the user.
+
+This example shows a 3-value drop-down menu called "Intensity". The default is "1" which is "Mid" (because it is index-1 in the `valueStrings` array).
+
+```
+let PluginParameters = [
+  {
+    name: "Intensity",
+    type: "menu",
+    valueStrings: ["Low", "Mid", "High"],
+    defaultValue: 1
+  },
+  { param2 },
+  ...
+]
+```
+
+The following is combination of documented and undocumented parameter settings.
+
+`type`: defines the type parameter widget
+- “lin”: Creates a linear slider
+- “log”: Creates a logarithmic slider
+- “momentary”: Creates a momentary button (one-shot trigger)
+- “menu”: Creates a menu. Also needs the `valueStrings` property that is an array of strings to show in the menu.
+- "checkbox": a true/false selector
+- “target”: Allows user to select a MIDI destination
+
+`defaultValue`: the integer or float number to set as default value. Default is 0.0.
+
+`minValue`: integer or float setting the minimum slider value.  default is 0.0
+
+`maxValue`: integer or float setting the maximum slider value.  default is 0.0
+
+`numberOfSteps`: an integer number to define the number of steps of a slider
+
+`unit`: a string to present a unit description in the plug-in controls. If no value is typed, the default behavior is to display no unit.
+
+`text`: Type text to create a divider/header in the plug-in UI.
+
+
+#### `PluginParameters` Functions
+
+Global functions for handling parameters...
+
+Function | Description
+--- | ---
+`ParameterChanged(paramNum, value)`	| Called after any parameter change by the user. paramNum is the parameter index in `PluginParameters`
+`GetParameter(param-name)` | retrieves the current console value of a parameter
+`SetParameter(param-name, value)` | sets the console value of a parameter
+`UpdatePluginParameters()` | dynamically updates the user interface
+
+
+#### `PluginParameters` Example
+
+```
+var PluginParameters =
+[
+    // Text divider / header
+    {
+        name:"------ Sample Console ------",
+	      type:"text",
+    },
+    // Note Velocity: linear slider with a range of 1 to 127 in 126 steps. Default: 100
+    {
+        name:"Note Velocity",
+        type:"lin",
+        minValue:1,
+        maxValue:127,
+        numberOfSteps:126,
+        defaultValue:100
+    },
+    // Transpose: linear slider with a range of -24 to 24 in 48 steps. Defauly: 0
+    {
+        name:"Transpose",
+        type:'lin',
+        minValue:-24,
+        maxValue:24,
+        numberOfSteps:48,
+        unit: "semi-tones",
+	      defaultValue: 0
+    },
+    // Checkbox that is defaulted to off (de-selected)
+    {
+        name:"Enable",
+        type:"checkbox",
+        defaultValue: 0
+    },
+    // Menu with 2 items is presented as radio buttons
+    {
+        name:"Radio",
+        type:"menu",
+        valueStrings:["Opt 1", "Opt 2"],
+        // default is the index in valueStrings array
+        defaultValue: 1
+    },
+    // Menu with 3 or more menu is presented as drop-down menu
+    {
+        name:"Range",
+        type:"menu",
+        valueStrings:["Low", "Mid", "High"],
+        // default is the index in valueStrings array - Mid
+        defaultValue: 1
+    },
+    // MIDI Target selector
+    {
+        name: "Target",
+        type: "target",
+    },
+    // Momentary trigger button
+    {
+        name: "Trigger",
+        type: "momentary",
+    }
+
+    function ParameterChanged(param, value) {
+        // param is index in PluginParameters array
+        Trace(`"${PluginParameters[param].name}" changed to ${value}`);
+    }
+];
+```
+
 
 ### `MIDI` Object
 
@@ -572,3 +915,24 @@ The `MIDI` object also presents the following internal utilities. It's recommend
 `_makeNoteNames` | Utility that creates the `_noteNames` array
 `_ccNames` | Array of 128 MIDI Control Change names. `['Bank MSB', 'Modulation','Breath', ... 'Poly Mode On']`
 `_sendEventOnAllChannels` | Use the public functions
+
+
+
+## Appendix 1 - Native Functions
+
+These functions are implemented natively by Scripter and available for JavaScript. You could call them directly, but it's preferrable to use the public JavaScript functions documented above.
+
+This is not a complete list.
+
+- `SendMIDIEventNow` - used by `event.send()`
+- `SendMIDIEventAfterMilliseconds` - used by `event.sendAfterMilliseconds()`
+- `SendMIDIEventAtBeat` - used by `event.sendAtBeat()`
+- `SendMIDIEventAfterBeats` - used by `event.sendAfterBeats()`
+
+
+## Appendix 2 - Real Time??
+
+
+From @Dewdman42 on https://www.logicprohelp.com/forum/viewtopic.php?t=132827&start=20
+
+ProcessMIDI() gets called as javascript code to execute ahead of time. LPX allows plugins and itself to operate on a buffer full of data in whatever way they need to; ahead of time. Midi events are not actually "sent" when you call event.send(). They are "scheduled". There is this period of time where LPX and plugins are operating on audio data in the buffer and basically churning it and modifying the audio, taking into account midi events that are scheduled there to have software instruments use those midi events to modify the audio buffer, etc.. Finally when its time for that buffer to be played, then the buffer, along with any midi events that need to be sent externally, will be sent out the hardware interfaces. ProcessMIDI() is how you can schedule midi events to be processed during that audio buffer process block. How far ahead of time will this javascript get called to schedule the midi events? We don't know.
