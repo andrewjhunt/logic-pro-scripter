@@ -1,13 +1,6 @@
 # Logic Pro Scripter Guide
 
-This guide is oriented towards developers who want to use their dev knowledge to do good stuff with MIDI scripts. It assumes some knowledge of both Logic Pro and JavaScript.
-
-The Scripter plug-in provides an interface between JavaScript code and the MIDI data of a Logic Pro channel. It allows users to create scripts that:
-
-* Generate MIDI: like notes for chords, arpeggios. Or controls for modulation and effects.
-* Transform MIDI: transpose notes, modify timing and rhythm
-* Inject automation
-* Control anything that MIDI can do
+This guide is intended for developers who want to use their dev knowledge to do good stuff with Scripter for MIDI in Logic Pro. It assumes some knowledge of both Logic Pro and JavaScript. I maintain it because I found the Apple doc both incomplete and difficult to use.
 
 ## Contents
 
@@ -15,6 +8,13 @@ The Scripter plug-in provides an interface between JavaScript code and the MIDI 
 {:toc}
 
 ## Background
+
+The Scripter plug-in provides an interface between JavaScript code and the MIDI data of a Logic Pro channel. It allows users to create scripts that:
+
+* Generate MIDI: like notes for chords, arpeggios. Or controls for modulation and effects.
+* Transform MIDI: transpose notes, modify timing and rhythm
+* Inject automation
+* Control anything that MIDI can do
 
 ### Doc Status
 
@@ -45,19 +45,21 @@ Script is a MIDI plug-in. Here's the quick steps to get scripter going (but ther
 
 ![Instrument Channel](images/instrument-channel.png)
 
-and has a blank channel strip...
+[2] On the channel strip, click to add a MIDI FX.
 
 ![Channel Strip](images/channel-strip.png)
 
-[2] Add "Scripter" as a MIDI FX
+[3] Add "Scripter" as a MIDI FX
 
 ![MIDI FX Options](images/midifx-options.png)
 
-[3] Two Scripter windows will open. First is the plug-in control panel which is much like any plug-in window -- except that you are able to program it. The second is the Script Editor which is the playspace for developers.
+[5] Two Scripter windows will open. First is the plug-in control panel which is much like any plug-in window -- except that you are able to program it. The second is the Script Editor which is the playspace for developers.
 
 ![Scripter Plugin Window](images/scripter-plugin-window.png)
 
 ![Script Editor](images/scripter-dev-window.png)
+
+#### Script Editor Panels
 
 The Script Editor has two panels:
 
@@ -101,9 +103,15 @@ Logic Pro script directory contains the Factory Script plug-ins that you see in 
 
 ## Standard JavaScript Capabilities
 
-Script is ES6 (EcmaScript 6).
+Apple's doc provides limited information on the JavaScript environment provided by Scripter. So, here's a quick summary which points some things that are standard, useful but documented and useful but not available.
 
-Most of the standard set of JavaScript features you know and love are available like...
+Scripter uses is JavaScript ES6 (EcmaScript 6).  That's the same as modern browsers (as of 2021) and more powerful than some of the older JavaScript doc and examples on the web.
+
+The Scripter editor is a half-decent environment with some syntax checking and error highlighting. Some developers say that they do their development in an emulated Scripter environment with a better editor - sounds good to me.  (TODO find an link to such a beast)
+
+Scripter requires all the code to be in a single script (no `import` or `require` of your favourites libraries and modules).
+
+Scripter makes most of the standard set of JavaScript features you know and love are available like...
 
 - `Class`
 - `Date`
@@ -113,21 +121,16 @@ Most of the standard set of JavaScript features you know and love are available 
 - `RegExp`
 - plenty more
 
-ES6 gives us lots of nice features compared to older variants.
+ES6 in Scripter gives us lots of nice features compared to older JavaScript variants.
 
-* `let` and `const` declarations
 * Arrow functions as shorthand: `const square = (num) => num * num;`
+* `let` and `const` declarations for best practice
 * Default parameter values: `const square = (num=1) => num * num;`
-* rest parameter (...) allows a function to treat an indefinite number of arguments as an array. `function sum(...args) { code }`
+* "Rest" parameter (...) allows a function to treat an indefinite number of arguments as an array. `function sum(...args) { code }`
 * `for/of` loops: `for (variable of iterable) { ... }`
 * JavaScript Classes
 * JavaScript Promises (I'm not sure this is any use in Scripter for MIDI because we can't call async functions but feel free to code creatively)
 * Array.find() and Array.findIndex()
-
-
-## Few Differences for JavaScript Developers using Scripter
-
-So you're already a decent JavaScript programmer. What's familiar or different about Scripter?
 
 
 ### Limitations to JavaScript
@@ -135,7 +138,7 @@ So you're already a decent JavaScript programmer. What's familiar or different a
 There are some features that JS developers take for granted in a browser or node.js that are not available in Logic's Script.
 
 - file reading or any OS access
-- `require` or `import` for neat packaging of your code
+- `require` or `import` for neat packaging of your code or re-using existing code libraries
 - `setTimeout` for delayed operators - see instead the [Event timing methods](#event-methods) and the [ProcessMIDI()](#processmidievent) callback
 - `alert`
 - `console` - use `Trace` instead
@@ -146,6 +149,7 @@ You can implementation a range of useful input controls with the [`PluginParamet
 
 Unfortunately, there is no way to get text input from a user unless your user is prepared to edit a script.
 
+But then, Scripter is a simpler development environment than for creation of full plug-ins so expect some limitations.
 
 ### Fragility
 
@@ -155,16 +159,16 @@ Some easy ways to crash Logic with Scripter...
 
 * Exceed tight memory limitations
 * Exceed tight time limitations
+* Print too much with [`Trace()`](#trace)
 * Other crashes that I can't diagnose
 
-The time limitations MAKE SENSE. Music is time-sensitive and delays of a few milliseconds can affect output quality. (Look below for the `Idle()` that helps with slower tasks.)
+To be clear... the time limitations **MAKE SENSE**. Music is time-sensitive and delays of a few milliseconds can affect output quality. (Look below for the `Idle()` that helps with slower tasks.)
 
 ### Unlike a Browser or Node.js
 
 Each JavaScript runtime has a context. JS running in a browser has access to windows, DOM and other webby things plus many critical security constraints.  Node.js has access to parts of the operating system including the file system, ability to load packages plus a different set of critical security constraints.
 
-Scripter is a smaller environment than either the browser or node.js.
-
+Scripter is a more compact and limited environment than either the browser or node.js.
 
 
 ## Global Variables
@@ -191,8 +195,6 @@ Feature | Description
 `Trace(obj)` | Prints `obj` to the console. Only a single parameter is supported
 `Reset()` | Called when (a) bypass the Scripter plug-in, or (b) transport is started. No parameters
 `Idle()` | Called during idle times when it won't get in the way of HandleMIDI() and ProcessMIDI(). Usually a few times per second. TODO - expand
-
-
 
 
 ### `HandleMIDI(event)`
