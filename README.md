@@ -9,10 +9,12 @@ The Scripter plug-in provides an interface between JavaScript code and the MIDI 
 * Inject automation
 * Control anything that MIDI can do
 
+* TOC
+{:toc}
 
 ## Contents
 
-* [Background](#background)
+* XXX[Background](#background)
   * [Doc Status](#doc-status)
   * [Apple's Scripter Documentation](#apples-scripter-documentation)
   * [Getting Started](#getting-started)
