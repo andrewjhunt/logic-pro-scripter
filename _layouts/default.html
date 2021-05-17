@@ -32,6 +32,9 @@
           TOC...
         </div>
 
+        <div id='sidebar-toc'>
+        </div>
+
         {% if site.github.is_project_page %}
           <!--
           <p class="header">Maintainer: <a class="header name" href="{{ site.github.owner_url }}">{{ site.github.owner_name }}</a></p>
@@ -48,14 +51,6 @@
       <section>
         <div>
           <pre>
-            site.static_files
-            {{ site.static_files | jsonify }}
-          </pre>
-          <pre>
-            site.html_pages
-            {{ site.html_pages | jsonify }}
-          </pre>
-          <pre>
             site.collections
             {{ site.collections | jsonify }}
           </pre>
@@ -71,6 +66,12 @@
       -->
     </div>
     <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+    <script>
+      var itm = document.getElementById("markdown-toc");
+      var cln = itm.cloneNode(true);
+      document.getElementById("sidebar-toc").appendChild(cln);
+    </script>
+    
     {% if site.google_analytics %}
       <script>
         (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
