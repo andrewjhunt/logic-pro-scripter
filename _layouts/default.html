@@ -102,15 +102,9 @@
       div.style.height = "30px";
       div.appendChild(img);
 
-      let county = 0;
       codeElements.forEach(pre => {
-        console.log(county++);
-        if (county == 1) {
-          console.log(codeElements[1]);
-          // codeElements[1].style.backgroundColor = 'green'
-          codeElements[1].style.position = 'relative';
-          codeElements[1].appendChild(div);
-        }
+        codeElements[1].style.position = 'relative';
+        codeElements[1].appendChild(div);
       });
 
       var clipboard = new ClipboardJS(codeElements,
