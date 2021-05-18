@@ -1,5 +1,6 @@
 # Mac crud
 .DS_Store
+tmp
 
 # Logs
 logs
