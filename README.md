@@ -1,4 +1,4 @@
-# Logic Pro Scripter Guide
+![Logic Pro Scripter Guide](images/icon.png)
 
 View the latest [Logic Pro Scripter Guide](https://andrewjhunt.github.io/logic-pro-scripter/)
 
