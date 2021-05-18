@@ -48,6 +48,13 @@ The scripts and tests were run on
 
 Can you start with Apple's doc for the [Logic Pro Scripter MIDI plug-in](https://support.apple.com/en-au/guide/logicpro/lgce728c68f6/mac) covering all the core topics you'll need. Integrated into that documentation is a set of scripts that you'll find packaged with Logic Pro Scripter under it's Factory / Tutorial Scripts.  The Factory scripts also reveal a lot about Scripter that's not written in the documentation.
 
+
+### Other Guides and Resources
+
+[An Introduction to Scripting in Logic X by Will Walker](https://music.tutsplus.com/tutorials/an-introduction-to-scripting-in-logic-x--cms-23920)
+
+[Collection of LogicScripts by JBramauer](https://github.com/JBramauer/LogicScripts)
+
 ### Getting Started
 
 Script is a MIDI plug-in. Here's the quick steps to get scripter going (but there's much better doc elsewhere).
@@ -910,7 +917,7 @@ Block '1.0' is indexed to the start of the project.
 This example shows a 3-value drop-down menu called "Intensity". The default is "1" which is "Mid" (because it is index-1 in the `valueStrings` array).
 
 ```
-let PluginParameters = [
+var PluginParameters = [
   {
     name: "Intensity",
     type: "menu",
