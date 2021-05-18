@@ -622,6 +622,15 @@ TODO...
 
 Here's a JSON dump of the object contents...
 ```
+function HandleMIDI(event) {
+  if (event instanceof NoteOn) {
+    Trace(JSON.stringify(event, null, 4));
+  }
+}
+
+/*
+ * Example output
+
 {
     "detune":0,
     "pitch":36,
@@ -636,6 +645,7 @@ Here's a JSON dump of the object contents...
     "articulationID":0,
     "beatPos":0
 }
+ */
 ```
 
 #### `NoteOn` Event
@@ -758,8 +768,9 @@ function HandleMIDI(event) {
 	Trace(JSON.stringify(event, null, 4))
 }
 
+/*
+ * Output from a NoteOn event
 
-// Output from a NoteOn event
 [NoteOn channel:1 pitch:44 [G#1] velocity:91]
 {
     "detune": 0,
@@ -775,6 +786,7 @@ function HandleMIDI(event) {
     "articulationID": 0,
     "beatPos": 0
 }
+*/
 ```
 
 
@@ -800,7 +812,8 @@ function ProcessMIDI() {
     Trace(JSON.stringify(info, null, 4));
 }
 
-// Example Output
+/*
+ * Example Output
 {
     "playing": true,
     "blockStartBeat": 2.93541949590048,
@@ -813,6 +826,7 @@ function ProcessMIDI() {
     "leftCycleBeat": 1,
     "rightCycleBeat": 5,
 }
+ */
 ```
 
 The object properties explained...
