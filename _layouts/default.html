@@ -104,7 +104,7 @@
 
       codeElements.forEach(pre => {
         pre.style.position = 'relative';
-        pre.appendChild(div);
+        pre.appendChild(div.cloneNode(true));
       });
 
       var clipboard = new ClipboardJS(codeElements,
