@@ -103,8 +103,8 @@
       div.appendChild(img);
 
       codeElements.forEach(pre => {
-        codeElements[1].style.position = 'relative';
-        codeElements[1].appendChild(div);
+        pre.style.position = 'relative';
+        pre.appendChild(div);
       });
 
       var clipboard = new ClipboardJS(codeElements,
