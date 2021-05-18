@@ -83,16 +83,46 @@
 
     <!-- Add copy-to-clipboard to add code -->
     <script>
-      var codeElements = document.querySelectorAll('pre');
+      let codeElements = document.querySelectorAll('pre');
+
+      let img = document.createElement("img");
+      img.src = "images/copy.svg";
+      img.style.margin = "0px";
+      img.style.padding = "0px";
+      img.style.paddingRight = "5px";
+      img.style.border = "0px";
+      img.style.height = "20px";
+
+      let div = document.createElement("div");
+      div.style.position = "absolute";
+      div.style.bottom = "0px";
+      div.style.right = "0px";
+      div.style.margin = "0px";
+      div.style.width = "30px";
+      div.style.height = "30px";
+      div.appendChild(img);
+
+      let county = 0;
+      codeElements.forEach(pre => {
+        console.log(county++);
+        if (county == 1) {
+          console.log(codeElements[1]);
+          // codeElements[1].style.backgroundColor = 'green'
+          codeElements[1].style.position = 'relative';
+          codeElements[1].appendChild(div);
+        }
+      });
+
       var clipboard = new ClipboardJS(codeElements,
         {
           target: function(trigger) {
-            console.log('target: function:', trigger)
-            console.log('trigger.style:', trigger.style);
             const backgroundColor = trigger.style.backgroundColor;
-            trigger.style.backgroundColor = '#e0e0ff'
+            trigger.style.backgroundColor = '#e0e0f0'
             setTimeout(
-              function() {trigger.style.backgroundColor = backgroundColor},
+              function() {
+                trigger.style.backgroundColor = backgroundColor;
+                window.getSelection().removeAllRanges();
+              },
               300
             );
             return trigger;
@@ -100,6 +130,7 @@
         }
       );
     </script>
+
 
     {% if site.google_analytics %}
       <script>
