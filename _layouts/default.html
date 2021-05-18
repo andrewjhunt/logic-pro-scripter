@@ -63,9 +63,36 @@
     </div>
     <!--[if !IE]><script>fixScale(document);</script><![endif]-->
     <script>
-      var itm = document.getElementById("markdown-toc");
-      var cln = itm.cloneNode(true);
-      document.getElementById("sidebar-toc").appendChild(cln);
+      // Copy the TOC to another location
+      // var itm = document.getElementById("markdown-toc");
+      // var cln = itm.cloneNode(true);
+      // document.getElementById("sidebar-toc").appendChild(cln);
+    </script>
+
+    <script>
+      // Enable a copy-to-clipboard on every <code> element
+      var codeElements = document.querySelectorAll('pre');
+      var clipboard = new ClipboardJS(codeElements);
+    </script>
+
+    <!-- Add copy-to-clipboard to add code -->
+    <script>
+      var codeElements = document.querySelectorAll('pre');
+      var clipboard = new ClipboardJS(codeElements,
+        {
+          target: function(trigger) {
+            console.log('target: function:', trigger)
+            console.log('trigger.style:', trigger.style);
+            const backgroundColor = trigger.style.backgroundColor;
+            trigger.style.backgroundColor = 'red'
+            setTimeout(
+              function() {trigger.style.backgroundColor = backgroundColor},
+              300
+            );
+            return trigger;
+          }
+        }
+      );
     </script>
 
     {% if site.google_analytics %}
