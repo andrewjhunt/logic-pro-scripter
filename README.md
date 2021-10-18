@@ -527,7 +527,6 @@ Class | Description
 `ProgramChange` | Represents a MIDI program change event
 `ChannelPressure` | Represents a MIDI channel pressure event
 `PitchBend` | Represents a MIDI pitch bend event
-`Fader` | Represents a Fader event
 
 
 #### Event Methods
@@ -743,20 +742,47 @@ value | [MIDI](#midi-object) channel pressure value from -8192 to 8191
 inStartFrame | ??
 isRealtime | ??
 
-#### `Fader` Events
-
-Represents a Fader event. It has all the default [`Event` methods](#event-methods) plus the following properties:
-
-Property | Description
---- | ---
-channel | [MIDI](#midi-object) value from 1 to 16
-?? number | [MIDI](#midi-object) fader number from 0 to 127
-value | [MIDI](#midi-object) fader value from 0 to 127
-inStartFrame | ??
-isRealtime | ??
-
 
 #### `TargetEvent` Events
+
+Represents a user-defined MIDI ControlChannel message or can control plug-in parameters that a user selects through a `target` interface from the [`PluginParameters` object](#pluginparameters-object).
+
+In this example:
+* Include a `PluginParameters` of type `target` called "Select Target".
+* The default value of the drop-down is "Off". This has a value of `-1`.
+* The `ParameterChanged()` function is a debug utility to print the details of any change of the target made byt the user through the Plugin control. <br> e.g. `"Select Target" set to "Foot Control" [value=4]`
+* The `MIDI.ccName()` utility converts the MIDI value (0-127) to a human-readable format. e.g. `4` is "Foot Control"
+
+XXX
+
+```
+var PluginParameters = [
+  {
+    name: "Select Target",
+    type: "target"
+  }
+];
+
+// Pretty-print each time the user changes a parameter (debug)
+function ParameterChanged(paramNum, value) {
+  const paramName = PluginParameters[paramNum].name;
+  const targetName = MIDI.ccName(value)
+  Trace(`"${paramName}" set to "${targetName}" [value=${value}]`)
+}
+```
+
+"Select Target" set to "Foot Control" [value=4]
+
+
+
+You can create user-definable MIDI CC messages, or you can control plug-in parameters.
+TargetEvent reads the parameter to be modified from a menu where the user can select a destination MIDI CC.
+Alternately, you can use the Learn Plug-In Parameter feature to assign any plug-in parameter inserted after (below) Scripter in the same channel strip.
+The chosen destination is saved with the plug-in setting.
+
+
+
+TargetEvent.value(float): Sets the target value.
 
 TODO
 
@@ -1131,3 +1157,26 @@ This is not a complete list.
 From @Dewdman42 on https://www.logicprohelp.com/forum/viewtopic.php?t=132827&start=20
 
 ProcessMIDI() gets called as javascript code to execute ahead of time. LPX allows plugins and itself to operate on a buffer full of data in whatever way they need to; ahead of time. Midi events are not actually "sent" when you call event.send(). They are "scheduled". There is this period of time where LPX and plugins are operating on audio data in the buffer and basically churning it and modifying the audio, taking into account midi events that are scheduled there to have software instruments use those midi events to modify the audio buffer, etc.. Finally when its time for that buffer to be played, then the buffer, along with any midi events that need to be sent externally, will be sent out the hardware interfaces. ProcessMIDI() is how you can schedule midi events to be processed during that audio buffer process block. How far ahead of time will this javascript get called to schedule the midi events? We don't know.
+
+## Appendix 3 - TODO
+
+This is a work-in-progress. In addition to TODO notes through this document...
+
+1. Resolve: Fader Event appears to be mythical (and sometimes confused online with a Fader PluginParameter). Confirm and clean up
+2. If Fader Event doesn't exist, then how to create a MIDI fader event
+3. Get proper documentation for TargetEvent
+4. Does old EventTypes.js need a mention (it's not visible in Logic Pro X 10.6+)
+5. Write up `beatPos`
+
+
+
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-YG888BHRL0"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-YG888BHRL0');
+</script>
